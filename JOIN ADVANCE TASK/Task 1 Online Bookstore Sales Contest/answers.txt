@@ -1,0 +1,169 @@
+Q2:
+SELECT sale_date, COUNT(DISTINCT book_id) AS unique_books_sold
+FROM Sales
+GROUP BY sale_date;
+----------------------------------------------------
+Q3:
+SELECT
+    books.book_id,
+    books.title,
+    sales.sale_date,
+    sales.quantity
+FROM
+    books
+JOIN sales ON books.book_id = sales.book_id
+
+ 
+
+WHERE
+  // يعني القيم الي فوق بدنا نوخدها من هون
+    (
+        sales.sale_date,
+        sales.quantity
+    ) IN(
+    SELECT
+        sale_date,
+        MAX(quantity)
+    FROM
+        Sales
+    GROUP BY
+        sale_date
+)
+ORDER BY
+    sales.sale_date,
+    books.book_id;
+-----------------------------------------------------
+Q4:
+SELECT
+    s.sale_date,
+    s.book_id,
+    b.title
+FROM
+    Sales s
+JOIN Books b ON
+    s.book_id = b.book_id
+WHERE
+    (
+        s.sale_date,
+        s.quantity,
+        s.book_id
+    ) IN(
+    SELECT
+        sale_date,
+        quantity,
+        MIN(book_id)
+    FROM
+        Sales
+    WHERE
+        (sale_date, quantity) IN(
+        SELECT
+            sale_date,
+            MAX(quantity)
+        FROM
+            Sales
+        GROUP BY
+            sale_date
+    )
+GROUP BY
+    sale_date,
+    quantity
+);
+
+***********FOR TESTING************
+INSERT INTO sales (sale_id,sale_date,book_id,quantity)
+VALUE('19','2024-4-8','202','10')
+**********************************
+-----------------------------------------------------
+Q5:
+
+SELECT
+    SUM(quantity),COUNT(*) AS total_sales,
+    COUNT(DISTINCT book_id)
+FROM
+    sales
+
+
+-----------------------------------------------------
+Q6:
+SELECT sale_date, 
+       COUNT(*) / (SELECT COUNT(*) FROM Books) AS daily_sales_rate
+FROM Sales
+GROUP BY sale_date;
+
+-----------------------------------------------------
+Q7:
+SELECT
+    sale_date,
+    SUM(quantity) AS total_quantity_sold
+FROM
+    Sales
+GROUP BY
+    sale_date
+ORDER BY
+    sale_date;
+-----------------------------------------------------
+Q8:
+
+SELECT book_id, title
+FROM Books
+WHERE book_id IN (
+    SELECT book_id
+    FROM Sales
+    GROUP BY book_id
+    HAVING COUNT(DISTINCT sale_date) = 15
+);
+
+
+***********FOR TESTING************
+INSERT INTO sales (sale_id,sale_date,book_id,quantity)
+VALUE('20','2024-4-3','101','1'),
+('21','2024-4-4','101','1'),
+('22','2024-4-6','101','1'),
+('23','2024-4-7','101','1'),
+('24','2024-4-8','101','1'),
+('25','2024-4-9','101','1'),
+('26','2024-4-11','101','1'),
+('27','2024-4-12','101','1'),
+('28','2024-4-13','101','1'),
+('29','2024-4-14','101','1')
+**********************************
+-----------------------------------------------------
+Q9:
+SELECT COUNT(sales.sale_date) AS nimber_od_days, sales.book_id
+FROM sales
+GROUP BY sales.book_id
+-----------------------------------------------------
+Q10:
+SELECT sales.quantity, sales.book_id, sales.sale_date
+FROM sales
+GROUP by sales.book_id, sales.sale_date
+-----------------------------------------------------
+Q11:
+
+SELECT MAX(sales.quantity) as max_quantity , sales.book_id, sales.sale_date
+FROM sales
+GROUP BY sales.sale_date
+-----------------------------------------------------
+Q12:
+
+SELECT sale_date, book_id, quantity
+FROM Sales
+WHERE quantity>1
+GROUP by sale_date;
+
+-----------------------------------------------------
+Q13:
+SELECT sale_date, book_id, quantity
+FROM Sales
+WHERE quantity<15
+GROUP by sale_date;
+
+-----------------------------------------------------
+Q14:
+
+SELECT 
+    (SELECT SUM(quantity) FROM Sales) AS total_sales,
+    (SELECT COUNT(DISTINCT book_id) FROM Sales) AS unique_books_sold,
+    (SELECT book_id FROM Sales GROUP BY book_id ORDER BY SUM(quantity) DESC LIMIT 1) AS highest_selling_book
+FROM Sales;
+

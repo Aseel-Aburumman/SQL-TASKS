@@ -1,0 +1,101 @@
+Q1:
+SELECT customers.customer_id, customers.customer_name, orders.order_id, orders.order_date, orders.shipping_date
+FROM customers
+JOIN orders on customers.customer_id = orders.customer_id
+
+-------------------------------------------------------------------------------
+Q2:
+SELECT products.product_id, products.product_name, order_details.order_id, order_details.quantity, order_details.price
+FROM products
+LEFT JOIN order_details on products.product_id = order_details.product_id
+
+
+-------------------------------------------------------------------------------
+Q3:
+
+SELECT employees.employee_id, employees.employee_name, departments.department_name
+FROM employees  
+RIGHT JOIN departments   ON employees.department_id = departments.department_id;
+
+-------------------------------------------------------------------------------
+Q4:
+
+SELECT SUM(order_details.quantity * order_details.price) AS TOTAL_SALES, order_details.product_id, products.product_name
+FROM order_details  
+ JOIN products   ON order_details.product_id = products.product_id
+ GROUP by order_details.product_id
+
+
+-------------------------------------------------------------------------------
+Q5:
+SELECT order_details.quantity, order_details.order_id, products.product_name,customers.customer_name
+FROM customers  
+JOIN orders   ON customers.customer_id = orders.customer_id
+JOIN order_details   ON orders.order_id = order_details.order_id
+JOIN products   ON order_details.product_id = products.product_id;
+
+
+-------------------------------------------------------------------------------
+Q6:
+SELECT customers.customer_id, customers.customer_name, COUNT(orders.order_id) AS order_count
+FROM customers 
+INNER JOIN orders  ON customers.customer_id = orders.customer_id
+GROUP BY customers.customer_id, customers.customer_name
+HAVING COUNT(orders.order_id) > 5;
+
+********FOR TESTING ***********************
+INSERT INTO orders (order_id, customer_id, order_date, shipping_date) VALUES
+(6, 1, '2023-01-06', '2023-01-07'),
+(7, 1, '2023-01-07', '2023-01-08'),
+(8, 1, '2023-01-08', '2023-01-09'),
+(9, 1, '2023-01-09', '2023-01-11');
+********************************************
+
+
+
+-------------------------------------------------------------------------------
+Q7:
+*******There is no FULL OUTER JOIN in MySQL***************.
+****You can emulate FULL OUTER JOIN using UNION***********
+
+-- LEFT JOIN to include all employees
+SELECT e.employee_id, e.employee_name, COALESCE(p.project_name, 'No Project') AS project_name
+FROM employees e
+LEFT JOIN employee_projects ep ON e.employee_id = ep.employee_id
+LEFT JOIN projects p ON ep.project_id = p.project_id
+
+UNION
+
+-- RIGHT JOIN to include all projects
+SELECT e.employee_id, e.employee_name, COALESCE(p.project_name, 'No Project') AS project_name
+FROM employees e
+RIGHT JOIN employee_projects ep ON e.employee_id = ep.employee_id
+RIGHT JOIN projects p ON ep.project_id = p.project_id
+
+ORDER BY employee_id;
+
+
+-------------------------------------------------------------------------------
+Q8:
+
+SELECT 'Active' AS status, c.customer_name, o.order_id, o.order_date
+FROM customers c
+INNER JOIN orders o ON c.customer_id = o.customer_id
+WHERE c.status = 'active'
+UNION
+SELECT 'Inactive' AS status, c.customer_name, o.order_id, o.order_date
+FROM customers c
+INNER JOIN orders o ON c.customer_id = o.customer_id
+WHERE c.status = 'inactive';
+
+-------------------------------------------------------------------------------
+Q9:
+SELECT o.order_id, c.customer_name,
+       CASE 
+           WHEN o.shipping_date IS NOT NULL THEN 'Shipped'
+           WHEN o.shipping_date IS NULL AND o.order_date <= CURRENT_DATE THEN 'Pending'
+           ELSE 'Canceled'
+       END AS status
+FROM orders o
+INNER JOIN customers c ON o.customer_id = c.customer_id;
+
